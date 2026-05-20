@@ -1,0 +1,133 @@
+[
+  {
+    "id": "seed-cuidador-1",
+    "nombreCompleto": "María López",
+    "correo": "maria.lopez@nanyscare.demo",
+    "passwordHash": "demo-no-login",
+    "telefono": "614 123 4567",
+    "ubicacion": "Chihuahua, Chihuahua",
+    "rol": "cuidador",
+    "fechaRegistro": "2026-01-15T10:00:00.000Z",
+    "fotoPath": null,
+    "perfil": {
+      "aniosExperiencia": 5,
+      "tarifaPorHora": 120,
+      "certificaciones": ["Primeros auxilios infantiles", "RCP"],
+      "capacidades": ["Bebés", "Niños pequeños", "Tareas escolares"],
+      "sobreMi": "Soy cuidadora con más de 5 años de experiencia cuidando niños de todas las edades. Me considero responsable, cariñosa y paciente.",
+      "calificacionPromedio": 4.9,
+      "totalResenas": 128,
+      "disponibilidad": [
+        {"dia": "lunes", "horaInicio": "07:00", "horaFin": "20:00"},
+        {"dia": "martes", "horaInicio": "07:00", "horaFin": "20:00"},
+        {"dia": "miercoles", "horaInicio": "07:00", "horaFin": "20:00"},
+        {"dia": "jueves", "horaInicio": "07:00", "horaFin": "20:00"},
+        {"dia": "viernes", "horaInicio": "07:00", "horaFin": "20:00"},
+        {"dia": "sabado", "horaInicio": "08:00", "horaFin": "14:00"}
+      ]
+    }
+  },
+  {
+    "id": "seed-cuidador-2",
+    "nombreCompleto": "Laura Martínez",
+    "correo": "laura.martinez@nanyscare.demo",
+    "passwordHash": "demo-no-login",
+    "telefono": "614 234 5678",
+    "ubicacion": "Chihuahua, Chihuahua",
+    "rol": "cuidador",
+    "fechaRegistro": "2026-02-03T09:00:00.000Z",
+    "fotoPath": null,
+    "perfil": {
+      "aniosExperiencia": 3,
+      "tarifaPorHora": 120,
+      "certificaciones": ["Educación infantil"],
+      "capacidades": ["Niños pequeños", "Tareas escolares"],
+      "sobreMi": "Estudiante avanzada en educación infantil con pasión por el aprendizaje creativo.",
+      "calificacionPromedio": 4.6,
+      "totalResenas": 86,
+      "disponibilidad": [
+        {"dia": "lunes", "horaInicio": "14:00", "horaFin": "21:00"},
+        {"dia": "martes", "horaInicio": "14:00", "horaFin": "21:00"},
+        {"dia": "miercoles", "horaInicio": "14:00", "horaFin": "21:00"},
+        {"dia": "jueves", "horaInicio": "14:00", "horaFin": "21:00"},
+        {"dia": "viernes", "horaInicio": "14:00", "horaFin": "21:00"}
+      ]
+    }
+  },
+  {
+    "id": "seed-cuidador-3",
+    "nombreCompleto": "Ana Hernández",
+    "correo": "ana.hernandez@nanyscare.demo",
+    "passwordHash": "demo-no-login",
+    "telefono": "614 345 6789",
+    "ubicacion": "Chihuahua, Chihuahua",
+    "rol": "cuidador",
+    "fechaRegistro": "2026-01-22T11:00:00.000Z",
+    "fotoPath": null,
+    "perfil": {
+      "aniosExperiencia": 4,
+      "tarifaPorHora": 110,
+      "certificaciones": ["Primeros auxilios"],
+      "capacidades": ["Bebés", "Niños pequeños", "Tareas escolares"],
+      "sobreMi": "Cuidadora con experiencia trabajando con familias en horarios flexibles.",
+      "calificacionPromedio": 4.4,
+      "totalResenas": 67,
+      "disponibilidad": [
+        {"dia": "lunes", "horaInicio": "08:00", "horaFin": "18:00"},
+        {"dia": "miercoles", "horaInicio": "08:00", "horaFin": "18:00"},
+        {"dia": "viernes", "horaInicio": "08:00", "horaFin": "18:00"},
+        {"dia": "sabado", "horaInicio": "09:00", "horaFin": "15:00"}
+      ]
+    }
+  },
+  {
+    "id": "seed-cuidador-4",
+    "nombreCompleto": "Carmen Ruiz",
+    "correo": "carmen.ruiz@nanyscare.demo",
+    "passwordHash": "demo-no-login",
+    "telefono": "614 456 7890",
+    "ubicacion": "Chihuahua, Chihuahua",
+    "rol": "cuidador",
+    "fechaRegistro": "2026-03-10T08:00:00.000Z",
+    "fotoPath": null,
+    "perfil": {
+      "aniosExperiencia": 2,
+      "tarifaPorHora": 100,
+      "certificaciones": [],
+      "capacidades": ["Niños pequeños"],
+      "sobreMi": "Inicio mi camino como cuidadora con muchas ganas de aprender y aportar.",
+      "calificacionPromedio": 4.2,
+      "totalResenas": 21,
+      "disponibilidad": [
+        {"dia": "martes", "horaInicio": "10:00", "horaFin": "19:00"},
+        {"dia": "jueves", "horaInicio": "10:00", "horaFin": "19:00"}
+      ]
+    }
+  },
+  {
+    "id": "seed-cuidador-5",
+    "nombreCompleto": "Sofía Ramírez",
+    "correo": "sofia.ramirez@nanyscare.demo",
+    "passwordHash": "demo-no-login",
+    "telefono": "614 567 8901",
+    "ubicacion": "Chihuahua, Chihuahua",
+    "rol": "cuidador",
+    "fechaRegistro": "2026-02-18T14:00:00.000Z",
+    "fotoPath": null,
+    "perfil": {
+      "aniosExperiencia": 6,
+      "tarifaPorHora": 140,
+      "certificaciones": ["Primeros auxilios", "Pedagogía", "RCP"],
+      "capacidades": ["Bebés", "Niños pequeños", "Tareas escolares", "Niños con necesidades especiales"],
+      "sobreMi": "Pedagoga con experiencia trabajando con niños neurodivergentes. Trato cálido y profesional.",
+      "calificacionPromedio": 5.0,
+      "totalResenas": 95,
+      "disponibilidad": [
+        {"dia": "lunes", "horaInicio": "07:00", "horaFin": "19:00"},
+        {"dia": "martes", "horaInicio": "07:00", "horaFin": "19:00"},
+        {"dia": "miercoles", "horaInicio": "07:00", "horaFin": "19:00"},
+        {"dia": "jueves", "horaInicio": "07:00", "horaFin": "19:00"}
+      ]
+    }
+  }
+]

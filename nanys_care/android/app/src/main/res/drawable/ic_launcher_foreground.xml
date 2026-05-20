@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Corazón morado al fondo -->
+    <path
+        android:fillColor="#6A3DE8"
+        android:pathData="M54,72 C54,72 30,58 30,42 C30,34 36,28 44,28 C48,28 51,30 54,33 C57,30 60,28 64,28 C72,28 78,34 78,42 C78,58 54,72 54,72 Z"/>
+    <!-- Detalle rosa del corazón -->
+    <path
+        android:fillColor="#EC4C8B"
+        android:pathData="M64,28 C72,28 78,34 78,42 C78,52 70,60 62,66 C68,60 72,52 72,44 C72,38 68,34 64,34 C61,34 59,36 57,38 L54,33 C57,30 60,28 64,28 Z"/>
+</vector>
