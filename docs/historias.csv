@@ -1,0 +1,118 @@
+ID - Título,Descripción,Criterios de Aceptación
+H1 - Registro de nuevos usuarios,"Como usuario nuevo (Tutor o Cuidador) quiero poder registrarme usando correo electronico y una contraseña, para poder acceder a las funcionalidades de la plataforma","•El sistema debera solicitar nombre, correo electronico, contraseña y tipo de usuario.
+•El correo electronico no debe estar previamente registrado. 
+•La contraseña debe almacenarse de forma segura. 
+•El sistema debe mostrar un mensaje de confirmacion al completar el registro. 
+•El usuario debe poder iniciar sesión despues de registrarse correctamente"
+H2 - Inicio de sesión,Como usuario registrado deseo iniciar sesión con mi correo y mi contraseña para acceder a mi cuenta y utilizar la plataforma,"•El sistema debe validar las credenciales ingresadas
+•El usuario debe acceder unicamente si los datos son correctos
+•El sistema debe mostrar mensaje de error si las credenciales son inválidas
+•El sistema debe proteger el acceso ante intentos no autorizados"
+H3 - Creación de perfil del Cuidador,Como Cuidador deseo crear un perfil profesional con mi información para que los Tutores puedan conocer de mis servicios y experiencias para contratarme,"•El sistema debe permitir subir una fotografía
+•El sistema debe permitir registrar experiencia y y certificaciones
+•El sistema debe permitir configurar disponibilidad y tarifas
+•La información debe guardarse correctamente
+•El perfil debe ser visible para los Tutores"
+H4 - Configuración de tarifas,Como cuidador deseo establecer tarifas basadas en mi experiencia y habilidades para ofrecer precios de acuerdo a mi perfil profesional,"•El sistema debe permittir registrar tarifas 
+•Las tarifas deben asociarse al perfil profresional del Cuidador 
+•El Tutor debe visualizar las tarifas registradas
+•El sistema debe actualizar las tarifas cuando el perfil sea modificado"
+H5 - Registro de perfil del Tutor,Como Tutor quiero registrar información sobre mis hijos y sus necesidades para encontrar cuidadores adecuados,"•El sistema debe permitir registrar información de los hijos
+•El sistema debe permitir agregar necesidades especiales
+•El Tutor debe poder editar la información
+•La información debe almacenarse correctamente"
+H6 - Búsqueda y filtrado de Cuidadores,Como Tutor deseo buscar cuidadores utilizando filtros para encontrar opciones adecuadas de acuerdo a mis necesidades,"•El sistema debe permitir buscar por ubicación
+•El sistema debe permitir filtrar por disponibilidad
+•El sistema debe permitir filtrar por precio y experiencia
+•El sistema debe mostrar calificaciones de los Cuidadores
+•Los resultados deben mostrarse rapidamente"
+H7 - Recepción de solicitudes de servicio,Como Cuidador deseo recibir solicitudes compatibles con mi disponibilidad  para gestionar oportunidades de servicio,"•El sistema debe enviar solicitudes relacionadas con la disponibilidad del Cuidador.
+•La solicitud debe incluir información básica del servicio.
+•El sistema debe notificar nuevas solicitudes.
+•El Cuidador debe poder consultar las solicitudes recibidas."
+H8 - Reserva de citas de cuidado,Como Tutor deseo reservar fechas y horarios disponibles para contratar servicios de cuidado infantil,"•El sistema debe mostrar horarios disponibles.
+•El Tutor debe poder seleccionar fecha y hora.
+•La reserva debe almacenarse correctamente.
+•El Cuidador debe recibir una notificación de la solicitud.
+•El sistema debe evitar citas duplicadas."
+H9 - Recordatorios automáticos por correo,Como usuario del sistema deseo recibir recordatorios automaticos por correo electronico para recordar citas y actividades programadas,"•El sistema debe enviar recordatorios automáticamente.
+•Los correos deben incluir fecha y hora de la cita.
+•El sistema debe enviar recordatorios antes de la cita programada.
+•El usuario debe recibir correctamente el correo electrónico."
+H10 - Gestión de solicitudes de citas,Como cuidador deseo aceptar o rechazar solicitudes de citas para administrar mi disponibilidad,"•El sistema debe mostrar solicitudes pendientes.
+•El Cuidador debe poder aceptar solicitudes.
+•El Cuidador debe poder rechazar solicitudes.
+•El Tutor debe recibir una notificación con la respuesta.
+•El estado de la cita debe actualizarse automáticamente."
+H11 - Calificación y reseñas del servicio,Como Tutor quiero calificar y comentar sobre el servicio recibido para compartir mi experiencia con otros usuarios,"•El sistema debe permitir asignar una calificación.
+•El sistema debe permitir escribir comentarios.
+•Las reseñas deben almacenarse correctamente.
+•Las calificaciones deben mostrarse en el perfil del Cuidador."
+H12 - Notas privadas del Cuidador,Como cuidador deseo registrar comentarios privados sobre los tutores para llevar control personal de mis experiencias ,"•El sistema debe permitir escribir notas privadas.
+•Solo el Cuidador debe visualizar sus comentarios.
+•La información debe guardarse correctamente.
+•El sistema debe permitir editar o eliminar comentarios."
+H13 - Notificaciones de actividad del sistema,Como usuario deseo recibir correos sobre actividades importantes para estar informado sobre movimientos en el sistema,"•El sistema debe enviar correos sobre reservas.
+•El sistema debe enviar correos sobre mensajes recibidos.
+•El sistema debe enviar correos sobre pagos realizados.
+•Las notificaciones deben enviarse automáticamente."
+H14 - Alertas de próximas citas,Como usuario deseo recibir recordatorios de las proximas citas para evitar retrasos u olvidar citas,"•El sistema debe enviar recordatorios antes de cada cita.
+•El correo debe contener información básica de la cita.
+•Los recordatorios deben enviarse automáticamente.
+•El usuario debe recibir correctamente la notificación."
+H15 - Consulta de agenda,Como usuario deseo poder consultar mi agenda de actividades para organizar mis horarios y citas programadas,"•El sistema debe mostrar citas programadas.
+•El sistema debe mostrar horarios ocupados y disponibles.
+•El usuario debe visualizar detalles básicos de cada cita.
+•La agenda debe actualizarse automáticamente."
+H16 - Consulta de reglamento,Como cuidador deseo poder consultar el reglamento y normas de conducta para conocer las politicas y lineamientos de cada Tutor,"•El sistema debe mostrar el reglamento actualizado.
+•El Cuidador debe poder acceder al reglamento en cualquier momento.
+•El reglamento debe visualizarse correctamente.
+•La información debe estar disponible únicamente para usuarios registrados."
+H17 - Seguridad y protección de datos,Como usuario de la plataforma deseo que mi informacion personal se encuentre protegida para utilizar el sistema de forma segura y confiable,"•El sistema debe cifrar las contraseñas almacenadas.
+•El sistema debe proteger la información sensible de los usuarios.
+•Solo usuarios autorizados deben acceder a la información privada.
+•El sistema debe prevenir accesos no autorizados.
+•La información transmitida debe manejarse de forma segura."
+H18 - Escalabilidad del sistema,Como administrador deseo que la plataforma soporte e crecimiento de usuarios para mantener un buen rendimiento del servicio,"•El sistema debe soportar múltiples usuarios conectados simultáneamente.
+•El rendimiento no debe degradarse significativamente al aumentar usuarios.
+•La arquitectura debe permitir futuras ampliaciones funcionales.
+•El sistema debe mantener estabilidad durante alta demanda."
+H19 - Disponibilidad continua (24/7),Como usuario de la plataforma deseo poder acceder al sistema en cualquier momento y utlizar los servicios cuando los necesite,"•El sistema debe estar disponible las 24 horas del día.
+•El tiempo de inactividad debe ser mínimo.
+•En caso de mantenimiento, el sistema debe notificar a los usuarios.
+•El sistema debe recuperarse rápidamente ante fallas."
+H20 - Interfaz intuitiva y responsiva,Como usuario de plataforma quiero una interfaz sencilla y adaptable para navegar de manera facil desde cualquier dispositivo,"•La interfaz debe ser fácil de entender y utilizar.
+•El sistema debe adaptarse a diferentes tamaños de pantalla.
+•La navegación debe ser clara y accesible.
+•Los elementos visuales deben visualizarse correctamente en móviles."
+H21 - Compatibilidad móvil (iOS y Android),Como usuario movil de la aplicacion quiero usar la app anto en IOS como en Android para acceder ,"•La aplicación debe funcionar en dispositivos IOS.
+•La aplicación debe funcionar en dispositivos Android.
+•Las funcionalidades deben comportarse correctamente en ambas plataformas.
+•La experiencia de usuario debe mantenerse estable en dispositivos móviles."
+H22 - Optimización de tiempos de respuesta,Como usuario de la app deseo que las busquedas y perfiles carguen rapidamente para tener una experiencia fluida dentro del sistema,"•Las búsquedas deben completarse en menos de 4 segundos.
+•La carga de perfiles debe realizarse en menos de 4 segundos.
+•El sistema debe mantener tiempos de respuesta estables.
+•El rendimiento debe mantenerse aun con múltiples usuarios conectados."
+H23 - Mantenimiento y actualizaciones periódicas,Como usuario de la plataforma deseo que el sistema reciba mejoras constantes para tener una app segura y eficiente,"•El sistema debe permitir actualizaciones periódicas.
+•Las actualizaciones deben mejorar seguridad o rendimiento.
+•Las actualizaciones no deben afectar gravemente la disponibilidad.
+•El sistema debe corregir errores detectados mediante mantenimiento continuo."
+H24,,
+H25,,
+H26,,
+H27,,
+H28,,
+H29,,
+H30,,
+H31,,
+H32,,
+H33,,
+H34,,
+H35,,
+H36,,
+H37,,
+H38,,
+H39,,
+H40,,
+H41,,
+H42,,
