@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 
 import 'providers/auth_provider.dart';
 import 'providers/booking_provider.dart';
@@ -20,15 +21,35 @@ class NanysCareApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => CaregiverListProvider()),
         ChangeNotifierProvider(create: (_) => BookingProvider()),
       ],
-      builder: (context, _) {
-        final auth = context.watch<AuthProvider>();
-        return MaterialApp.router(
-          title: 'Nanys Care',
-          debugShowCheckedModeBanner: false,
-          theme: AppTheme.light,
-          routerConfig: AppRouter.build(auth),
-        );
-      },
+      child: const _AppView(),
+    );
+  }
+}
+
+class _AppView extends StatefulWidget {
+  const _AppView();
+
+  @override
+  State<_AppView> createState() => _AppViewState();
+}
+
+class _AppViewState extends State<_AppView> {
+  late final GoRouter _router;
+
+  @override
+  void initState() {
+    super.initState();
+    final auth = context.read<AuthProvider>();
+    _router = AppRouter.build(auth);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp.router(
+      title: 'Nanys Care',
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.light,
+      routerConfig: _router,
     );
   }
 }
