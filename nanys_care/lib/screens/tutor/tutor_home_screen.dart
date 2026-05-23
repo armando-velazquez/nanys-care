@@ -36,6 +36,12 @@ class _TutorHomeScreenState extends State<TutorHomeScreen> {
     await context.read<BookingProvider>().cargarParaTutor(auth.usuario!.id);
   }
 
+  Future<void> _cerrarSesion() async {
+    await context.read<AuthProvider>().cerrarSesion();
+    if (!mounted) return;
+    context.go(AppRoutes.login);
+  }
+
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
@@ -116,6 +122,20 @@ class _TutorHomeScreenState extends State<TutorHomeScreen> {
                     ],
                   ),
                 ],
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: _cerrarSesion,
+                  icon: const Icon(Icons.logout),
+                  label: const Text('Cerrar sesión'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    side: const BorderSide(color: AppColors.primary),
+                    minimumSize: const Size.fromHeight(44),
+                  ),
+                ),
               ),
               const SizedBox(height: 16),
               _heroBuscar(),
