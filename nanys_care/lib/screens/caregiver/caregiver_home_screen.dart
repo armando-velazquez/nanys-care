@@ -62,7 +62,9 @@ class _CaregiverHomeScreenState extends State<CaregiverHomeScreen> {
     final horasProgramadas =
         confirmadas == 0 ? 0 : proximos.fold(0, (acc, c) => acc + c.duracionHoras);
 
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: SingleChildScrollView(
@@ -73,11 +75,7 @@ class _CaregiverHomeScreenState extends State<CaregiverHomeScreen> {
               const SizedBox(height: 8),
               Row(
                 children: [
-                  IconButton(
-                    icon: const Icon(Icons.menu, color: AppColors.primary),
-                    onPressed: _cerrarSesion,
-                    tooltip: 'Cerrar sesión',
-                  ),
+                  const SizedBox(width: 48),
                   const NanysLogo(fontSize: 20),
                   const Spacer(),
                   Stack(
@@ -366,6 +364,7 @@ class _CaregiverHomeScreenState extends State<CaregiverHomeScreen> {
         ),
       ),
       bottomNavigationBar: const CaregiverBottomNav(indexActual: 0),
+      ),
     );
   }
 
