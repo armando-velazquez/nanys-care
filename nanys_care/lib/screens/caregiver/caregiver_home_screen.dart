@@ -294,7 +294,7 @@ class _CaregiverHomeScreenState extends State<CaregiverHomeScreen> {
                     titulo: 'Mi agenda',
                     colorFondo: AppColors.primarySurface,
                     colorIcono: AppColors.primary,
-                    onTap: _irAReglamento,
+                    onTap: () => context.push(AppRoutes.caregiverAgenda),
                   ),
                   _Herramienta(
                     icono: Icons.chat_bubble_outline,

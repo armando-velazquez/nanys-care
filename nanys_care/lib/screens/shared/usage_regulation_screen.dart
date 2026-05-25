@@ -25,8 +25,6 @@ class UsageRegulationScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: const [
-              _IntroCard(),
-              SizedBox(height: 12),
               _RuleItem(
                 icon: Icons.access_time,
                 title: '1) Puntualidad en citas',
