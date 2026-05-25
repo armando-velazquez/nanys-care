@@ -89,6 +89,26 @@ class UsageRegulationScreen extends StatelessWidget {
   }
 }
 
+class _IntroCard extends StatelessWidget {
+  const _IntroCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.primarySurface,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: const Text(
+        'Este reglamento interno orienta el uso de Nanys Care en su versión MVP escolar. Está diseñado para una lectura rápida y para promover acuerdos seguros y claros.',
+        style: TextStyle(color: AppColors.textSecondary, height: 1.35),
+      ),
+    );
+  }
+}
+
 class _RuleItem extends StatelessWidget {
   final IconData icon;
   final String title;
