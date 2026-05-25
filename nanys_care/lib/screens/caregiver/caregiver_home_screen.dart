@@ -294,7 +294,7 @@ class _CaregiverHomeScreenState extends State<CaregiverHomeScreen> {
                     titulo: 'Mi agenda',
                     colorFondo: AppColors.primarySurface,
                     colorIcono: AppColors.primary,
-                    onTap: _proximo,
+                    onTap: _irAReglamento,
                   ),
                   _Herramienta(
                     icono: Icons.chat_bubble_outline,
@@ -351,7 +351,7 @@ class _CaregiverHomeScreenState extends State<CaregiverHomeScreen> {
                       ),
                     ),
                     OutlinedButton(
-                      onPressed: _proximo,
+                      onPressed: _irAReglamento,
                       style: OutlinedButton.styleFrom(
                           minimumSize: const Size(80, 36)),
                       child: const Text('Ver reglamento',
@@ -367,6 +367,10 @@ class _CaregiverHomeScreenState extends State<CaregiverHomeScreen> {
       ),
       bottomNavigationBar: const CaregiverBottomNav(indexActual: 0),
     );
+  }
+
+  void _irAReglamento() {
+    context.push(AppRoutes.caregiverRegulation);
   }
 
   void _proximo() {
