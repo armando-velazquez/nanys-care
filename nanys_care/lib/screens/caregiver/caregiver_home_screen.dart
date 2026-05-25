@@ -308,7 +308,7 @@ class _CaregiverHomeScreenState extends State<CaregiverHomeScreen> {
                     titulo: 'Reglamento',
                     colorFondo: AppColors.primarySurface,
                     colorIcono: AppColors.primary,
-                    onTap: _proximo,
+                    onTap: _irAReglamento,
                   ),
                 ],
               ),
