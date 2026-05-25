@@ -54,6 +54,16 @@ class _MyReservationsScreenState extends State<MyReservationsScreen>
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: AppColors.primary),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+              return;
+            }
+            context.go(AppRoutes.tutorHome);
+          },
+        ),
         title: const Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -196,6 +206,8 @@ class _TarjetaCita extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final caregivers = context.watch<CaregiverListProvider>();
+    final booking = context.read<BookingProvider>();
+    final auth = context.read<AuthProvider>();
     final entry = caregivers.porId(cita.cuidadorId);
     final nombre = entry?.usuario.nombreCompleto ?? 'Cuidador';
     final formato = DateFormat("EEE, d MMM y", 'es_MX');
@@ -288,6 +300,7 @@ class _TarjetaCita extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 10),
+
           Row(
             children: [
               Expanded(
@@ -327,6 +340,46 @@ class _TarjetaCita extends StatelessWidget {
               ),
             ],
           ),
+          if (cita.estado == EstadoCita.pendiente) ...[
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton.icon(
+                onPressed: () async {
+                  final confirmar = await showDialog<bool>(
+                    context: context,
+                    builder: (_) => AlertDialog(
+                      title: const Text('Cancelar solicitud'),
+                      content: const Text('¿Deseas cancelar esta solicitud?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(false),
+                          child: const Text('No'),
+                        ),
+                        ElevatedButton(
+                          onPressed: () => Navigator.of(context).pop(true),
+                          child: const Text('Sí, cancelar'),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (confirmar != true || auth.usuario == null) return;
+                  await booking.cancelarSolicitudTutor(
+                    citaId: cita.id,
+                    tutorId: auth.usuario!.id,
+                  );
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Solicitud cancelada')),
+                    );
+                  }
+                },
+                icon: const Icon(Icons.cancel_outlined, size: 18),
+                label: const Text('Cancelar solicitud'),
+                style: TextButton.styleFrom(foregroundColor: AppColors.danger),
+              ),
+            ),
+          ],
         ],
       ),
     );
