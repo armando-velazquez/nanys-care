@@ -94,7 +94,11 @@ class BookingService {
   /// Lista las solicitudes recibidas por un Cuidador (RF10).
   Future<List<Cita>> solicitudesDeCuidador(String cuidadorId) async {
     final citas = await _leerCitas();
-    return citas.where((c) => c.cuidadorId == cuidadorId).toList()
+    return citas
+        .where((c) =>
+            c.cuidadorId == cuidadorId &&
+            c.estado != EstadoCita.canceladaPorTutor)
+        .toList()
       ..sort((a, b) => b.fechaCreacion.compareTo(a.fechaCreacion));
   }
 
