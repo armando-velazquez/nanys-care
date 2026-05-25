@@ -80,4 +80,13 @@ class BookingProvider extends ChangeNotifier {
     await _service.actualizarEstado(citaId, EstadoCita.rechazada);
     await cargarParaCuidador(cuidadorId);
   }
+
+  Future<void> cancelarSolicitudTutor({
+    required String citaId,
+    required String tutorId,
+  }) async {
+    await _service.actualizarEstado(citaId, EstadoCita.canceladaPorTutor);
+    await cargarParaTutor(tutorId);
+  }
 }
+

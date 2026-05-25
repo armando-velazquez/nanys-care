@@ -10,7 +10,9 @@ import '../screens/auth/role_selection_screen.dart';
 import '../screens/auth/welcome_screen.dart';
 import '../screens/caregiver/care_requests_screen.dart';
 import '../screens/caregiver/caregiver_home_screen.dart';
+import '../screens/caregiver/caregiver_agenda_screen.dart';
 import '../screens/shared/splash_screen.dart';
+import '../screens/shared/usage_regulation_screen.dart';
 import '../screens/tutor/book_appointment_screen.dart';
 import '../screens/tutor/caregiver_detail_screen.dart';
 import '../screens/tutor/my_reservations_screen.dart';
@@ -37,6 +39,8 @@ class AppRoutes {
 
   static const caregiverHome = '/caregiver/home';
   static const caregiverRequests = '/caregiver/requests';
+  static const caregiverAgenda = '/caregiver/agenda';
+  static const caregiverRegulation = '/caregiver/regulation';
 }
 
 class AppRouter {
@@ -106,6 +110,14 @@ class AppRouter {
         GoRoute(
           path: AppRoutes.caregiverRequests,
           builder: (_, __) => const CareRequestsScreen(),
+        ),
+        GoRoute(
+          path: AppRoutes.caregiverAgenda,
+          builder: (_, __) => const CaregiverAgendaScreen(),
+        ),
+        GoRoute(
+          path: AppRoutes.caregiverRegulation,
+          builder: (_, __) => const UsageRegulationScreen(),
         ),
       ],
       redirect: (context, state) {
