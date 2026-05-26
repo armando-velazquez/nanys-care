@@ -312,53 +312,71 @@ class _TarjetaCuidador extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          Row(
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                '\$${p.tarifaPorHora.toStringAsFixed(0)}',
-                style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.primary),
-              ),
-              const Text(' / hora',
-                  style: TextStyle(
-                      fontSize: 12, color: AppColors.textSecondary)),
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: AppColors.successSurface,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Text('Disponible hoy',
-                    style: TextStyle(
-                        fontSize: 10,
+              Wrap(
+                spacing: 8,
+                runSpacing: 6,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  Text(
+                    '\$${p.tarifaPorHora.toStringAsFixed(0)}',
+                    style: const TextStyle(
+                        fontSize: 18,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.success)),
+                        color: AppColors.primary),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.only(top: 5),
+                    child: Text(' / hora',
+                        style: TextStyle(
+                            fontSize: 12, color: AppColors.textSecondary)),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: AppColors.successSurface,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Text('Disponible hoy',
+                        style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.success)),
+                  ),
+                ],
               ),
-              const Spacer(),
-              OutlinedButton(
-                onPressed: () => context.push(
-                    '${AppRoutes.tutorCaregiverDetail}/${u.id}'),
-                style: OutlinedButton.styleFrom(
-                    minimumSize: const Size(80, 36),
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12)),
-                child: const Text('Ver perfil',
-                    style: TextStyle(fontSize: 12)),
-              ),
-              const SizedBox(width: 6),
-              ElevatedButton(
-                onPressed: () =>
-                    context.push('${AppRoutes.tutorBook}/${u.id}'),
-                style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(80, 36),
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12)),
-                child: const Text('Agendar',
-                    style: TextStyle(fontSize: 12)),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => context.push(
+                          '${AppRoutes.tutorCaregiverDetail}/${u.id}'),
+                      style: OutlinedButton.styleFrom(
+                          minimumSize: const Size(0, 36),
+                          padding: const EdgeInsets.symmetric(horizontal: 10)),
+                      child: const Text('Ver perfil',
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(fontSize: 12)),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () =>
+                          context.push('${AppRoutes.tutorBook}/${u.id}'),
+                      style: ElevatedButton.styleFrom(
+                          minimumSize: const Size(0, 36),
+                          padding: const EdgeInsets.symmetric(horizontal: 10)),
+                      child: const Text('Agendar',
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(fontSize: 12)),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
