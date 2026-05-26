@@ -39,7 +39,7 @@ class _TutorHomeScreenState extends State<TutorHomeScreen> {
   Future<void> _cerrarSesion() async {
     await context.read<AuthProvider>().cerrarSesion();
     if (!mounted) return;
-    context.go(AppRoutes.login);
+    context.go(AppRoutes.welcome);
   }
 
   @override
