@@ -204,13 +204,7 @@ class _CaregiverHomeScreenState extends State<CaregiverHomeScreen> {
                       ),
                     ),
                     OutlinedButton(
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text(
-                                  'Editor de perfil en próximos sprints')),
-                        );
-                      },
+                      onPressed: () => context.push(AppRoutes.caregiverProfile),
                       style: OutlinedButton.styleFrom(
                         side: const BorderSide(color: AppColors.accent),
                         foregroundColor: AppColors.accent,
