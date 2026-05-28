@@ -201,6 +201,16 @@ class _MyReservationsScreenState extends State<MyReservationsScreen>
   }
 }
 
+class _ResenaFormData {
+  final int calificacion;
+  final String comentario;
+
+  const _ResenaFormData({
+    required this.calificacion,
+    required this.comentario,
+  });
+}
+
 class _TarjetaCita extends StatelessWidget {
   final Cita cita;
   const _TarjetaCita({required this.cita});
@@ -415,7 +425,7 @@ class _TarjetaCita extends StatelessWidget {
     final comentarioCtrl = TextEditingController();
     var calificacion = 5;
 
-    await showModalBottomSheet<void>(
+    final envio = await showModalBottomSheet<_ResenaFormData>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.white,
@@ -424,13 +434,13 @@ class _TarjetaCita extends StatelessWidget {
       ),
       builder: (sheetContext) {
         return StatefulBuilder(
-          builder: (context, setState) {
+          builder: (modalContext, setState) {
             return Padding(
               padding: EdgeInsets.only(
                 left: 20,
                 right: 20,
                 top: 18,
-                bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+                bottom: MediaQuery.of(modalContext).viewInsets.bottom + 20,
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -481,7 +491,9 @@ class _TarjetaCita extends StatelessWidget {
                         return IconButton(
                           onPressed: () => setState(() => calificacion = valor),
                           icon: Icon(
-                            valor <= calificacion ? Icons.star : Icons.star_border,
+                            valor <= calificacion
+                                ? Icons.star
+                                : Icons.star_border,
                             color: AppColors.primary,
                             size: 32,
                           ),
@@ -517,41 +529,13 @@ class _TarjetaCita extends StatelessWidget {
                       const SizedBox(width: 10),
                       Expanded(
                         child: ElevatedButton(
-                          onPressed: () async {
-                            final auth = context.read<AuthProvider>();
-                            final usuario = auth.usuario;
-                            if (usuario == null) return;
-                            final reviewProvider = context.read<ReviewProvider>();
-                            final ok = await reviewProvider.crearResena(
-                              citaId: cita.id,
-                              tutorId: usuario.id,
-                              cuidadorId: cita.cuidadorId,
-                              tutorNombre: usuario.nombreCompleto,
-                              calificacion: calificacion,
-                              comentario: comentarioCtrl.text,
+                          onPressed: () {
+                            Navigator.of(sheetContext).pop(
+                              _ResenaFormData(
+                                calificacion: calificacion,
+                                comentario: comentarioCtrl.text,
+                              ),
                             );
-                            if (!context.mounted) return;
-                            if (ok) {
-                              await context.read<CaregiverListProvider>().cargar();
-                              if (!context.mounted) return;
-                              Navigator.of(sheetContext).pop();
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Gracias, tu reseña fue enviada.'),
-                                  backgroundColor: AppColors.success,
-                                ),
-                              );
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    reviewProvider.ultimoError ??
-                                        'No se pudo guardar la reseña.',
-                                  ),
-                                  backgroundColor: AppColors.danger,
-                                ),
-                              );
-                            }
                           },
                           child: const Text('Enviar reseña'),
                         ),
@@ -567,6 +551,42 @@ class _TarjetaCita extends StatelessWidget {
     );
 
     comentarioCtrl.dispose();
+    if (envio == null || !context.mounted) return;
+
+    final auth = context.read<AuthProvider>();
+    final usuario = auth.usuario;
+    if (usuario == null) return;
+
+    final reviewProvider = context.read<ReviewProvider>();
+    final ok = await reviewProvider.crearResena(
+      citaId: cita.id,
+      tutorId: usuario.id,
+      cuidadorId: cita.cuidadorId,
+      tutorNombre: usuario.nombreCompleto,
+      calificacion: envio.calificacion,
+      comentario: envio.comentario,
+    );
+
+    if (!context.mounted) return;
+    if (ok) {
+      await context.read<CaregiverListProvider>().cargar();
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Gracias, tu reseña fue enviada.'),
+          backgroundColor: AppColors.success,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            reviewProvider.ultimoError ?? 'No se pudo guardar la reseña.',
+          ),
+          backgroundColor: AppColors.danger,
+        ),
+      );
+    }
   }
 
   Widget _badgeEstado(EstadoCita estado) {
