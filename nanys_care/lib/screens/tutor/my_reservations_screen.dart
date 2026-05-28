@@ -7,6 +7,7 @@ import '../../models/cita.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/booking_provider.dart';
 import '../../providers/caregiver_list_provider.dart';
+import '../../providers/review_provider.dart';
 import '../../routes/app_router.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/bottom_nav.dart';
@@ -36,6 +37,7 @@ class _MyReservationsScreenState extends State<MyReservationsScreen>
     if (auth.usuario == null) return;
     await context.read<CaregiverListProvider>().cargar();
     await context.read<BookingProvider>().cargarParaTutor(auth.usuario!.id);
+    await context.read<ReviewProvider>().cargarParaTutor(auth.usuario!.id);
   }
 
   @override
@@ -199,6 +201,16 @@ class _MyReservationsScreenState extends State<MyReservationsScreen>
   }
 }
 
+class _ResenaFormData {
+  final int calificacion;
+  final String comentario;
+
+  const _ResenaFormData({
+    required this.calificacion,
+    required this.comentario,
+  });
+}
+
 class _TarjetaCita extends StatelessWidget {
   final Cita cita;
   const _TarjetaCita({required this.cita});
@@ -208,9 +220,12 @@ class _TarjetaCita extends StatelessWidget {
     final caregivers = context.watch<CaregiverListProvider>();
     final booking = context.read<BookingProvider>();
     final auth = context.read<AuthProvider>();
+    final reviews = context.watch<ReviewProvider>();
     final entry = caregivers.porId(cita.cuidadorId);
     final nombre = entry?.usuario.nombreCompleto ?? 'Cuidador';
     final formato = DateFormat("EEE, d MMM y", 'es_MX');
+    final resena = reviews.resenaPorCita(cita.id);
+    final puedeCalificar = _puedeCalificar(cita);
 
     return Container(
       padding: const EdgeInsets.all(14),
@@ -323,19 +338,29 @@ class _TarjetaCita extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: ElevatedButton(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text(
-                              'Mensajería disponible en próximos sprints')),
-                    );
-                  },
+                  onPressed: puedeCalificar && resena == null
+                      ? () => _mostrarDialogoResena(context, nombre)
+                      : puedeCalificar
+                          ? null
+                          : () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Mensajería disponible en próximos sprints',
+                                  ),
+                                ),
+                              );
+                            },
                   style: ElevatedButton.styleFrom(
-                      minimumSize: const Size(80, 36),
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 8)),
-                  child: const Text('Mensaje',
-                      style: TextStyle(fontSize: 12)),
+                    minimumSize: const Size(80, 36),
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                  ),
+                  child: Text(
+                    puedeCalificar
+                        ? (resena == null ? 'Calificar' : 'Reseña enviada')
+                        : 'Mensaje',
+                    style: const TextStyle(fontSize: 12),
+                  ),
                 ),
               ),
             ],
@@ -383,6 +408,185 @@ class _TarjetaCita extends StatelessWidget {
         ],
       ),
     );
+  }
+
+
+  bool _puedeCalificar(Cita cita) {
+    final estaCancelada = cita.estado == EstadoCita.rechazada ||
+        cita.estado == EstadoCita.canceladaPorTutor;
+    if (estaCancelada) return false;
+    return cita.estado == EstadoCita.completada || cita.fecha.isBefore(DateTime.now());
+  }
+
+  Future<void> _mostrarDialogoResena(
+    BuildContext context,
+    String nombreCuidador,
+  ) async {
+    final comentarioCtrl = TextEditingController();
+    var calificacion = 5;
+
+    final envio = await showModalBottomSheet<_ResenaFormData>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+      ),
+      builder: (sheetContext) {
+        return StatefulBuilder(
+          builder: (modalContext, setState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 18,
+                bottom: MediaQuery.of(modalContext).viewInsets.bottom + 20,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 38,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: AppColors.border,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                  ),
+                  const Text(
+                    'Califica tu servicio',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Cuidador: $nombreCuidador',
+                    style: const TextStyle(color: AppColors.textSecondary),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      TextButton(
+                        onPressed: () => setState(() => calificacion = 0),
+                        child: Text(
+                          '0',
+                          style: TextStyle(
+                            color: calificacion == 0
+                                ? AppColors.primary
+                                : AppColors.textSecondary,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      ...List.generate(5, (i) {
+                        final valor = i + 1;
+                        return IconButton(
+                          onPressed: () => setState(() => calificacion = valor),
+                          icon: Icon(
+                            valor <= calificacion
+                                ? Icons.star
+                                : Icons.star_border,
+                            color: AppColors.primary,
+                            size: 32,
+                          ),
+                        );
+                      }),
+                    ],
+                  ),
+                  Center(
+                    child: Text(
+                      '$calificacion de 5 estrellas',
+                      style: const TextStyle(color: AppColors.textSecondary),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: comentarioCtrl,
+                    minLines: 3,
+                    maxLines: 5,
+                    decoration: const InputDecoration(
+                      hintText: 'Escribe cómo fue tu experiencia...',
+                      prefixIcon: Icon(Icons.rate_review_outlined),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.of(sheetContext).pop(),
+                          child: const Text('Cancelar'),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.of(sheetContext).pop(
+                              _ResenaFormData(
+                                calificacion: calificacion,
+                                comentario: comentarioCtrl.text,
+                              ),
+                            );
+                          },
+                          child: const Text('Enviar reseña'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+
+    comentarioCtrl.dispose();
+    if (envio == null || !context.mounted) return;
+
+    final auth = context.read<AuthProvider>();
+    final usuario = auth.usuario;
+    if (usuario == null) return;
+
+    final reviewProvider = context.read<ReviewProvider>();
+    final ok = await reviewProvider.crearResena(
+      citaId: cita.id,
+      tutorId: usuario.id,
+      cuidadorId: cita.cuidadorId,
+      tutorNombre: usuario.nombreCompleto,
+      calificacion: envio.calificacion,
+      comentario: envio.comentario,
+    );
+
+    if (!context.mounted) return;
+    if (ok) {
+      await context.read<CaregiverListProvider>().cargar();
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Gracias, tu reseña fue enviada.'),
+          backgroundColor: AppColors.success,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            reviewProvider.ultimoError ?? 'No se pudo guardar la reseña.',
+          ),
+          backgroundColor: AppColors.danger,
+        ),
+      );
+    }
   }
 
   Widget _badgeEstado(EstadoCita estado) {
