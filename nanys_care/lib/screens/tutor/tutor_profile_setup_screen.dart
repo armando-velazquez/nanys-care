@@ -305,21 +305,45 @@ class _TutorProfileSetupScreenState extends State<TutorProfileSetupScreen> {
                             ],
                           ),
                           const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Expanded(
-                                flex: 2,
-                                child: AppTextField(
-                                  hint: 'Ej. Sofía',
-                                  label: 'Nombre del niño/a',
-                                  controller: h.nombre,
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: _dropdownEdad(h),
-                              ),
-                            ],
+                          LayoutBuilder(
+                            builder: (context, constraints) {
+                              final isNarrow = constraints.maxWidth < 380;
+
+                              if (isNarrow) {
+                                return Column(
+                                  children: [
+                                    AppTextField(
+                                      hint: 'Ej. Sofía',
+                                      label: 'Nombre del niño/a',
+                                      controller: h.nombre,
+                                    ),
+                                    const SizedBox(height: 10),
+                                    _dropdownEdad(h),
+                                  ],
+                                );
+                              }
+
+                              return Row(
+                                children: [
+                                  Expanded(
+                                    flex: 2,
+                                    child: AppTextField(
+                                      hint: 'Ej. Sofía',
+                                      label: 'Nombre del niño/a',
+                                      controller: h.nombre,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: ConstrainedBox(
+                                      constraints:
+                                          const BoxConstraints(minWidth: 120),
+                                      child: _dropdownEdad(h),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
                           ),
                           const SizedBox(height: 10),
                           AppTextField(
