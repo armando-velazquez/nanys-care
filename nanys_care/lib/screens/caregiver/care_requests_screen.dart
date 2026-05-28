@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/cita.dart';
+import '../../models/usuario.dart';
+import '../../services/profile_service.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/booking_provider.dart';
 import '../../theme/app_colors.dart';
@@ -241,6 +243,7 @@ class _TarjetaSolicitud extends StatelessWidget {
     final esRechazada = cita.estado == EstadoCita.rechazada;
     final auth = context.read<AuthProvider>();
     final booking = context.read<BookingProvider>();
+    final profileService = ProfileService.instance;
 
     String etiqueta;
     Color etiquetaBg;
@@ -313,7 +316,35 @@ class _TarjetaSolicitud extends StatelessWidget {
                           style: const TextStyle(
                               fontSize: 12,
                               color: AppColors.textSecondary)),
+
                     const SizedBox(height: 4),
+                    FutureBuilder<Usuario?>(
+                      future: profileService.obtenerUsuarioPorId(cita.tutorId),
+                      builder: (context, snapshot) {
+                        final nombreTutor =
+                            snapshot.data?.nombre.trim().isNotEmpty == true
+                            ? snapshot.data!.nombre
+                            : 'Tutor no disponible';
+                        return Row(
+                          children: [
+                            const Icon(Icons.badge_outlined,
+                                size: 12, color: AppColors.textHint),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                'Tutor: $nombreTutor',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
                     Row(
                       children: [
                         const Icon(Icons.calendar_today_outlined,
