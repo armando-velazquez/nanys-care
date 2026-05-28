@@ -322,8 +322,8 @@ class _TarjetaSolicitud extends StatelessWidget {
                       future: profileService.obtenerUsuarioPorId(cita.tutorId),
                       builder: (context, snapshot) {
                         final nombreTutor =
-                            snapshot.data?.nombre.trim().isNotEmpty == true
-                            ? snapshot.data!.nombre
+                            snapshot.data?.nombreCompleto.trim().isNotEmpty == true
+                            ? snapshot.data!.nombreCompleto
                             : 'Tutor no disponible';
                         return Row(
                           children: [
