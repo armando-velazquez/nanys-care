@@ -20,6 +20,8 @@ class CaregiverProfileScreen extends StatefulWidget {
 }
 
 class _CaregiverProfileScreenState extends State<CaregiverProfileScreen> {
+  static const double _tarifaMinima = 1;
+  static const double _tarifaMaxima = 5000;
   final _formKey = GlobalKey<FormState>();
   final _nombre = TextEditingController();
   final _telefono = TextEditingController();
@@ -150,10 +152,11 @@ class _CaregiverProfileScreenState extends State<CaregiverProfileScreen> {
     );
     await auth.actualizarUsuarioActual(actualizado);
 
+    final tarifa = double.parse(_tarifa.text.trim());
     final perfil = PerfilCuidador(
       usuarioId: usuario.id,
       aniosExperiencia: int.tryParse(_experiencia.text) ?? 0,
-      tarifaPorHora: double.tryParse(_tarifa.text) ?? 0,
+      tarifaPorHora: tarifa,
       certificaciones: _certificaciones.text.trim().isEmpty
           ? []
           : _certificaciones.text
@@ -257,6 +260,18 @@ class _CaregiverProfileScreenState extends State<CaregiverProfileScreen> {
                   controller: _tarifa,
                   icono: Icons.attach_money,
                   keyboardType: TextInputType.number,
+                  validator: (v) {
+                    final valor = v?.trim() ?? '';
+                    if (valor.isEmpty) return 'La tarifa es requerida';
+                    final tarifa = double.tryParse(valor);
+                    if (tarifa == null) {
+                      return 'Ingresa una tarifa numérica válida';
+                    }
+                    if (tarifa < _tarifaMinima || tarifa > _tarifaMaxima) {
+                      return 'La tarifa debe estar entre 1 y 5000 MXN';
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 10),
                 AppTextField(
