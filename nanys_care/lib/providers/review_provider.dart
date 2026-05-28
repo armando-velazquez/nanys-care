@@ -41,6 +41,8 @@ class ReviewProvider extends ChangeNotifier {
   }) async {
     _cargando = true;
     _ultimoError = null;
+    // No notificamos aquí para evitar reconstruir/cerrar dependencias mientras
+    // el modal de calificación todavía está entregando su resultado.
     try {
       await _service.crearResena(
         citaId: citaId,
