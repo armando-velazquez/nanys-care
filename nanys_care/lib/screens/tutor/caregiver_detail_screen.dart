@@ -3,8 +3,10 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/perfil_cuidador.dart';
+import '../../models/resena.dart';
 import '../../providers/caregiver_list_provider.dart';
 import '../../routes/app_router.dart';
+import '../../services/review_service.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/bottom_nav.dart';
 
@@ -203,13 +205,10 @@ class CaregiverDetailScreen extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 10),
-                    if (p.totalResenas == 0)
-                      const Text(
-                        'Este cuidador todavía no tiene reseñas.',
-                        style: TextStyle(color: AppColors.textSecondary),
-                      )
-                    else
-                      const _ResenaDemo(),
+                    _ListaResenasCuidador(
+                      cuidadorId: u.id,
+                      totalResenas: p.totalResenas,
+                    ),
                   ],
                 ),
               ),
@@ -514,20 +513,77 @@ class _Cualidad {
   _Cualidad(this.icono, this.titulo, this.valor);
 }
 
-class _ResenaDemo extends StatelessWidget {
-  const _ResenaDemo();
+class _ListaResenasCuidador extends StatelessWidget {
+  final String cuidadorId;
+  final int totalResenas;
+
+  const _ListaResenasCuidador({
+    required this.cuidadorId,
+    required this.totalResenas,
+  });
+
   @override
   Widget build(BuildContext context) {
+    return FutureBuilder<List<Resena>>(
+      future: ReviewService.instance.listarPorCuidador(cuidadorId),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 8),
+            child: LinearProgressIndicator(minHeight: 2),
+          );
+        }
+
+        final resenas = snapshot.data ?? [];
+        if (resenas.isEmpty) {
+          return Text(
+            totalResenas == 0
+                ? 'Este cuidador todavía no tiene reseñas.'
+                : 'Las reseñas anteriores no tienen comentario disponible.',
+            style: const TextStyle(color: AppColors.textSecondary),
+          );
+        }
+
+        return Column(
+          children: resenas
+              .take(3)
+              .map(
+                (resena) => Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: _TarjetaResena(resena: resena),
+                ),
+              )
+              .toList(),
+        );
+      },
+    );
+  }
+}
+
+class _TarjetaResena extends StatelessWidget {
+  final Resena resena;
+
+  const _TarjetaResena({required this.resena});
+
+  @override
+  Widget build(BuildContext context) {
+    final inicial = resena.tutorNombre.trim().isEmpty
+        ? 'T'
+        : resena.tutorNombre.trim()[0].toUpperCase();
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         CircleAvatar(
           radius: 18,
           backgroundColor: AppColors.accentSurface,
-          child: const Text('A',
-              style: TextStyle(
-                  color: AppColors.accent,
-                  fontWeight: FontWeight.w700)),
+          child: Text(
+            inicial,
+            style: const TextStyle(
+              color: AppColors.accent,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
         ),
         const SizedBox(width: 8),
         Expanded(
@@ -536,37 +592,56 @@ class _ResenaDemo extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  const Text('Ana G.',
-                      style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary)),
+                  Flexible(
+                    child: Text(
+                      _nombreCorto(resena.tutorNombre),
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ),
                   const SizedBox(width: 6),
                   ...List.generate(
-                      5,
-                      (i) => const Icon(Icons.star,
-                          color: AppColors.primary, size: 14)),
+                    5,
+                    (i) => Icon(
+                      i < resena.calificacion
+                          ? Icons.star
+                          : Icons.star_border,
+                      color: AppColors.primary,
+                      size: 14,
+                    ),
+                  ),
                   const SizedBox(width: 4),
-                  const Text('5.0',
-                      style: TextStyle(
-                          fontSize: 11,
-                          color: AppColors.textSecondary)),
-                  const Spacer(),
-                  const Text('Hace 2 semanas',
-                      style: TextStyle(
-                          fontSize: 10,
-                          color: AppColors.textHint)),
+                  Text(
+                    resena.calificacion.toStringAsFixed(1),
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 4),
-              const Text(
-                'Mis hijos la adoran. Es puntual, atenta y muy cariñosa. ¡Totalmente recomendada!',
-                style: TextStyle(
-                    fontSize: 12, color: AppColors.textSecondary),
+              Text(
+                resena.comentario,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppColors.textSecondary,
+                ),
               ),
             ],
           ),
         ),
       ],
     );
+  }
+
+  String _nombreCorto(String nombre) {
+    final partes = nombre.trim().split(RegExp(r'\s+'));
+    if (partes.isEmpty || partes.first.isEmpty) return 'Tutor';
+    if (partes.length == 1) return partes.first;
+    return '${partes.first} ${partes[1][0]}.';
   }
 }
