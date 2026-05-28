@@ -69,6 +69,17 @@ class ProfileService {
     );
   }
 
+
+  Future<Usuario?> obtenerUsuarioPorId(String usuarioId) async {
+    final rawUsuarios = await _storage.leerLista(_archivoUsuarios);
+    final usuarios = rawUsuarios.map(Usuario.fromJson).toList();
+    try {
+      return usuarios.firstWhere((u) => u.id == usuarioId);
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// Devuelve todos los cuidadores junto con sus datos de Usuario
   /// para la pantalla de búsqueda (RF6).
   Future<List<({Usuario usuario, PerfilCuidador perfil})>>

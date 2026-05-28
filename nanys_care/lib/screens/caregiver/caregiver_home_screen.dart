@@ -217,24 +217,8 @@ class _CaregiverHomeScreenState extends State<CaregiverHomeScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('Próximos servicios',
-                      style: Theme.of(context).textTheme.titleLarge),
-                  TextButton(
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content: Text(
-                                'Agenda detallada en próximos sprints')),
-                      );
-                    },
-                    child: const Text('Ver agenda',
-                        style: TextStyle(color: AppColors.primary)),
-                  ),
-                ],
-              ),
+              Text('Próximos servicios',
+                  style: Theme.of(context).textTheme.titleLarge),
               if (proximos.isEmpty)
                 Container(
                   padding: const EdgeInsets.all(20),
