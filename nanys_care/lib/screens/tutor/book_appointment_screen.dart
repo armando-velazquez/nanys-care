@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import '../../models/hijo.dart';
+import '../../models/perfil_cuidador.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/booking_provider.dart';
 import '../../providers/caregiver_list_provider.dart';
@@ -33,16 +34,6 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
   String _tipoCuidado = 'Cuidado ocasional';
   final _notasCtrl = TextEditingController();
 
-  static const _horasDisponibles = [
-    '07:00 AM',
-    '09:00 AM',
-    '11:00 AM',
-    '01:00 PM',
-    '03:00 PM',
-    '05:00 PM',
-    '07:00 PM',
-  ];
-
   static const _tiposCuidado = [
     'Cuidado ocasional',
     'Cuidado recurrente',
@@ -58,6 +49,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
       if (auth.usuario != null) {
         context.read<ProfileProvider>().cargarPerfilTutor(auth.usuario!.id);
       }
+      context.read<BookingProvider>().cargarParaCuidador(widget.cuidadorId);
     });
   }
 
@@ -169,6 +161,15 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
     final p = entry.perfil;
     final total = p.tarifaPorHora * _duracion;
     final formatoFecha = DateFormat("EEEE, d 'de' MMMM y", 'es_MX');
+    final horasDisponibles = _horasDisponiblesDeCuidador(p);
+    final duracionesDisponibles = _duracionesDisponibles(horasDisponibles, p);
+
+    if (_horaSeleccionada != null && !horasDisponibles.contains(_horaSeleccionada)) {
+      _horaSeleccionada = null;
+    }
+    if (!duracionesDisponibles.contains(_duracion)) {
+      _duracion = duracionesDisponibles.isEmpty ? 1 : duracionesDisponibles.first;
+    }
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -288,7 +289,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
-                children: _horasDisponibles.map((h) {
+                children: horasDisponibles.map((h) {
                   final sel = _horaSeleccionada == h;
                   return GestureDetector(
                     onTap: () => setState(() => _horaSeleccionada = h),
@@ -314,6 +315,14 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                   );
                 }).toList(),
               ),
+              if (horasDisponibles.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.only(top: 8),
+                  child: Text(
+                    'No hay horarios disponibles para esta fecha.',
+                    style: TextStyle(color: AppColors.textSecondary),
+                  ),
+                ),
               const SizedBox(height: 20),
               const Text('2. Detalles del cuidado',
                   style: TextStyle(
@@ -321,7 +330,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                       fontSize: 15,
                       color: AppColors.textPrimary)),
               const SizedBox(height: 8),
-              _detallesCuidado(hijos),
+              _detallesCuidado(hijos, duracionesDisponibles),
               const SizedBox(height: 20),
               const Text('3. Resumen',
                   style: TextStyle(
@@ -411,7 +420,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
     );
   }
 
-  Widget _detallesCuidado(List<Hijo> hijos) {
+  Widget _detallesCuidado(List<Hijo> hijos, List<int> duracionesDisponibles) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -425,7 +434,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
             children: [
               Expanded(child: _dropdownHijo(hijos)),
               const SizedBox(width: 8),
-              Expanded(child: _dropdownDuracion()),
+              Expanded(child: _dropdownDuracion(duracionesDisponibles)),
             ],
           ),
           const SizedBox(height: 10),
@@ -474,7 +483,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
     );
   }
 
-  Widget _dropdownDuracion() {
+  Widget _dropdownDuracion(List<int> duracionesDisponibles) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -493,11 +502,11 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
         DropdownButtonFormField<int>(
           value: _duracion,
           isExpanded: true,
-          items: const [1, 2, 3, 4, 5, 6, 7, 8]
+          items: duracionesDisponibles
               .map((h) =>
                   DropdownMenuItem(value: h, child: Text('$h horas')))
               .toList(),
-          onChanged: (v) => setState(() => _duracion = v ?? 4),
+          onChanged: (v) => setState(() => _duracion = v ?? _duracion),
         ),
       ],
     );
@@ -666,5 +675,103 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
     final hm = hhmm.split(':');
     var h = (int.parse(hm[0]) + horas) % 24;
     return '${h.toString().padLeft(2, '0')}:${hm[1]}';
+  }
+
+  List<String> _horasDisponiblesDeCuidador(PerfilCuidador perfilCuidador) {
+    final weekday = _diaSemanaDesdeDateTime(_fechaSeleccionada);
+    final bloques = perfilCuidador.disponibilidad
+        .where((b) => b.dia == weekday)
+        .toList();
+    if (bloques.isEmpty) return [];
+
+    final booking = context.watch<BookingProvider>();
+    final citasDia = booking.solicitudesCuidador.where((c) {
+      return c.fecha.year == _fechaSeleccionada.year &&
+          c.fecha.month == _fechaSeleccionada.month &&
+          c.fecha.day == _fechaSeleccionada.day &&
+          c.estado != EstadoCita.rechazada &&
+          c.estado != EstadoCita.canceladaPorTutor;
+    }).toList();
+
+    final horas = <String>[];
+    for (final bloque in bloques) {
+      final inicio = _aMinutos(bloque.horaInicio);
+      final fin = _aMinutos(bloque.horaFin);
+      for (var t = inicio; t < fin; t += 60) {
+        final ocupada = citasDia.any((c) {
+          final cIni = _aMinutos(c.horaInicio);
+          final cFin = _aMinutos(c.horaFin);
+          return t >= cIni && t < cFin;
+        });
+        if (!ocupada) {
+          horas.add(_minutosA12h(t));
+        }
+      }
+    }
+    return horas.toSet().toList()..sort((a, b) => _aMinutos(_convertirA24(a)).compareTo(_aMinutos(_convertirA24(b))));
+  }
+
+  List<int> _duracionesDisponibles(List<String> horasDisponibles, PerfilCuidador perfilCuidador) {
+    if (_horaSeleccionada == null) return [1, 2, 3, 4, 5, 6, 7, 8];
+    final inicioSel = _aMinutos(_convertirA24(_horaSeleccionada!));
+    final weekday = _diaSemanaDesdeDateTime(_fechaSeleccionada);
+    final bloques = perfilCuidador.disponibilidad.where((b) => b.dia == weekday);
+    final booking = context.watch<BookingProvider>();
+    final citasDia = booking.solicitudesCuidador.where((c) {
+      return c.fecha.year == _fechaSeleccionada.year &&
+          c.fecha.month == _fechaSeleccionada.month &&
+          c.fecha.day == _fechaSeleccionada.day &&
+          c.estado != EstadoCita.rechazada &&
+          c.estado != EstadoCita.canceladaPorTutor;
+    }).toList();
+
+    final opciones = <int>[];
+    for (var d = 1; d <= 8; d++) {
+      final fin = inicioSel + d * 60;
+      final dentroBloque = bloques.any((b) =>
+          inicioSel >= _aMinutos(b.horaInicio) && fin <= _aMinutos(b.horaFin));
+      if (!dentroBloque) continue;
+      final cruzaCita = citasDia.any((c) {
+        final cIni = _aMinutos(c.horaInicio);
+        final cFin = _aMinutos(c.horaFin);
+        return inicioSel < cFin && fin > cIni;
+      });
+      if (!cruzaCita) opciones.add(d);
+    }
+    return opciones.isEmpty ? [1] : opciones;
+  }
+
+  int _aMinutos(String hhmm) {
+    final hm = hhmm.split(':');
+    return int.parse(hm[0]) * 60 + int.parse(hm[1]);
+  }
+
+  String _minutosA12h(int minutos) {
+    final h24 = (minutos ~/ 60) % 24;
+    final m = minutos % 60;
+    final suf = h24 >= 12 ? 'PM' : 'AM';
+    final h12 = h24 % 12 == 0 ? 12 : h24 % 12;
+    return '${h12.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')} $suf';
+  }
+
+  DiaSemana _diaSemanaDesdeDateTime(DateTime d) {
+    switch (d.weekday) {
+      case DateTime.monday:
+        return DiaSemana.lunes;
+      case DateTime.tuesday:
+        return DiaSemana.martes;
+      case DateTime.wednesday:
+        return DiaSemana.miercoles;
+      case DateTime.thursday:
+        return DiaSemana.jueves;
+      case DateTime.friday:
+        return DiaSemana.viernes;
+      case DateTime.saturday:
+        return DiaSemana.sabado;
+      case DateTime.sunday:
+        return DiaSemana.domingo;
+      default:
+        return DiaSemana.lunes;
+    }
   }
 }
