@@ -211,6 +211,151 @@ class _ResenaFormData {
   });
 }
 
+class _ResenaBottomSheet extends StatefulWidget {
+  final String nombreCuidador;
+
+  const _ResenaBottomSheet({required this.nombreCuidador});
+
+  @override
+  State<_ResenaBottomSheet> createState() => _ResenaBottomSheetState();
+}
+
+class _ResenaBottomSheetState extends State<_ResenaBottomSheet> {
+  final _formKey = GlobalKey<FormState>();
+  final _comentarioCtrl = TextEditingController();
+  var _calificacion = 5;
+
+  @override
+  void dispose() {
+    _comentarioCtrl.dispose();
+    super.dispose();
+  }
+
+  void _enviar() {
+    if (_formKey.currentState?.validate() != true) return;
+    Navigator.of(context).pop(
+      _ResenaFormData(
+        calificacion: _calificacion,
+        comentario: _comentarioCtrl.text,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(
+        left: 20,
+        right: 20,
+        top: 18,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+      ),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                width: 38,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: AppColors.border,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+            ),
+            const Text(
+              'Califica tu servicio',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Cuidador: ${widget.nombreCuidador}',
+              style: const TextStyle(color: AppColors.textSecondary),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextButton(
+                  onPressed: () => setState(() => _calificacion = 0),
+                  child: Text(
+                    '0',
+                    style: TextStyle(
+                      color: _calificacion == 0
+                          ? AppColors.primary
+                          : AppColors.textSecondary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                ...List.generate(5, (i) {
+                  final valor = i + 1;
+                  return IconButton(
+                    onPressed: () => setState(() => _calificacion = valor),
+                    icon: Icon(
+                      valor <= _calificacion ? Icons.star : Icons.star_border,
+                      color: AppColors.primary,
+                      size: 32,
+                    ),
+                  );
+                }),
+              ],
+            ),
+            Center(
+              child: Text(
+                '$_calificacion de 5 estrellas',
+                style: const TextStyle(color: AppColors.textSecondary),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _comentarioCtrl,
+              minLines: 3,
+              maxLines: 5,
+              decoration: const InputDecoration(
+                hintText: 'Escribe cómo fue tu experiencia...',
+                prefixIcon: Icon(Icons.rate_review_outlined),
+              ),
+              validator: (value) {
+                if ((value ?? '').trim().length < 3) {
+                  return 'Escribe al menos 3 caracteres.';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Cancelar'),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: _enviar,
+                    child: const Text('Enviar reseña'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _TarjetaCita extends StatelessWidget {
   final Cita cita;
   const _TarjetaCita({required this.cita});
@@ -410,21 +555,18 @@ class _TarjetaCita extends StatelessWidget {
     );
   }
 
-
   bool _puedeCalificar(Cita cita) {
     final estaCancelada = cita.estado == EstadoCita.rechazada ||
         cita.estado == EstadoCita.canceladaPorTutor;
     if (estaCancelada) return false;
-    return cita.estado == EstadoCita.completada || cita.fecha.isBefore(DateTime.now());
+    return cita.estado == EstadoCita.completada ||
+        cita.fecha.isBefore(DateTime.now());
   }
 
   Future<void> _mostrarDialogoResena(
     BuildContext context,
     String nombreCuidador,
   ) async {
-    final comentarioCtrl = TextEditingController();
-    var calificacion = 5;
-
     final envio = await showModalBottomSheet<_ResenaFormData>(
       context: context,
       isScrollControlled: true,
@@ -432,125 +574,9 @@ class _TarjetaCita extends StatelessWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
       ),
-      builder: (sheetContext) {
-        return StatefulBuilder(
-          builder: (modalContext, setState) {
-            return Padding(
-              padding: EdgeInsets.only(
-                left: 20,
-                right: 20,
-                top: 18,
-                bottom: MediaQuery.of(modalContext).viewInsets.bottom + 20,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 38,
-                      height: 4,
-                      margin: const EdgeInsets.only(bottom: 16),
-                      decoration: BoxDecoration(
-                        color: AppColors.border,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    ),
-                  ),
-                  const Text(
-                    'Califica tu servicio',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Cuidador: $nombreCuidador',
-                    style: const TextStyle(color: AppColors.textSecondary),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      TextButton(
-                        onPressed: () => setState(() => calificacion = 0),
-                        child: Text(
-                          '0',
-                          style: TextStyle(
-                            color: calificacion == 0
-                                ? AppColors.primary
-                                : AppColors.textSecondary,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                      ...List.generate(5, (i) {
-                        final valor = i + 1;
-                        return IconButton(
-                          onPressed: () => setState(() => calificacion = valor),
-                          icon: Icon(
-                            valor <= calificacion
-                                ? Icons.star
-                                : Icons.star_border,
-                            color: AppColors.primary,
-                            size: 32,
-                          ),
-                        );
-                      }),
-                    ],
-                  ),
-                  Center(
-                    child: Text(
-                      '$calificacion de 5 estrellas',
-                      style: const TextStyle(color: AppColors.textSecondary),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: comentarioCtrl,
-                    minLines: 3,
-                    maxLines: 5,
-                    decoration: const InputDecoration(
-                      hintText: 'Escribe cómo fue tu experiencia...',
-                      prefixIcon: Icon(Icons.rate_review_outlined),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: () => Navigator.of(sheetContext).pop(),
-                          child: const Text('Cancelar'),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.of(sheetContext).pop(
-                              _ResenaFormData(
-                                calificacion: calificacion,
-                                comentario: comentarioCtrl.text,
-                              ),
-                            );
-                          },
-                          child: const Text('Enviar reseña'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
+      builder: (_) => _ResenaBottomSheet(nombreCuidador: nombreCuidador),
     );
 
-    comentarioCtrl.dispose();
     if (envio == null || !context.mounted) return;
 
     final auth = context.read<AuthProvider>();
@@ -558,6 +584,9 @@ class _TarjetaCita extends StatelessWidget {
     if (usuario == null) return;
 
     final reviewProvider = context.read<ReviewProvider>();
+    final caregivers = context.read<CaregiverListProvider>();
+    final messenger = ScaffoldMessenger.of(context);
+
     final ok = await reviewProvider.crearResena(
       citaId: cita.id,
       tutorId: usuario.id,
@@ -569,16 +598,16 @@ class _TarjetaCita extends StatelessWidget {
 
     if (!context.mounted) return;
     if (ok) {
-      await context.read<CaregiverListProvider>().cargar();
+      await caregivers.cargar();
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         const SnackBar(
           content: Text('Gracias, tu reseña fue enviada.'),
           backgroundColor: AppColors.success,
         ),
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(
           content: Text(
             reviewProvider.ultimoError ?? 'No se pudo guardar la reseña.',
