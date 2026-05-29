@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'providers/auth_provider.dart';
 import 'providers/booking_provider.dart';
 import 'providers/caregiver_list_provider.dart';
+import 'providers/private_notes_provider.dart';
 import 'providers/profile_provider.dart';
 import 'providers/review_provider.dart';
 import 'routes/app_router.dart';
@@ -22,6 +23,7 @@ class NanysCareApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => CaregiverListProvider()),
         ChangeNotifierProvider(create: (_) => BookingProvider()),
         ChangeNotifierProvider(create: (_) => ReviewProvider()),
+        ChangeNotifierProvider(create: (_) => PrivateNotesProvider()),
       ],
       child: const _AppView(),
     );

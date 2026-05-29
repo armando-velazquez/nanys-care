@@ -40,11 +40,13 @@ class _CareRequestsScreenState extends State<CareRequestsScreen> {
   Widget build(BuildContext context) {
     final booking = context.watch<BookingProvider>();
     final todas = booking.solicitudesCuidador;
-    final nuevas =
-        todas.where((c) => c.estado == EstadoCita.pendiente).toList();
+    // H7: "Nuevas" solo muestra solicitudes compatibles con la disponibilidad
+    final nuevas = booking.solicitudesCompatibles
+        .where((c) => c.estado == EstadoCita.pendiente)
+        .toList();
     final aceptadas =
         todas.where((c) => c.estado == EstadoCita.confirmada).toList();
-    final enRevision = <Cita>[]; // estado intermedio futuro
+    final enRevision = <Cita>[];
 
     final mostradas = switch (_tab) {
       'nuevas' => nuevas,
@@ -198,7 +200,6 @@ class _CareRequestsScreenState extends State<CareRequestsScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: const CaregiverBottomNav(indexActual: 1),
     );
   }
 }
@@ -207,25 +208,34 @@ class _ChipTab extends StatelessWidget {
   final String label;
   final bool activo;
   final VoidCallback onTap;
-  const _ChipTab(
-      {required this.label, required this.activo, required this.onTap});
+
+  const _ChipTab({
+    required this.label,
+    required this.activo,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding:
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: activo ? AppColors.primary : AppColors.primarySurface,
+          color:
+              activo ? AppColors.primary : AppColors.primarySurface,
           borderRadius: BorderRadius.circular(20),
         ),
-        child: Text(label,
-            style: TextStyle(
-              color: activo ? Colors.white : AppColors.primary,
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-            )),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: activo ? Colors.white : AppColors.primary,
+          ),
+        ),
       ),
     );
   }
@@ -237,77 +247,84 @@ class _TarjetaSolicitud extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final formato = DateFormat("d MMM y", 'es_MX');
-    final esNueva = cita.estado == EstadoCita.pendiente;
-    final esAceptada = cita.estado == EstadoCita.confirmada;
-    final esRechazada = cita.estado == EstadoCita.rechazada;
+    final booking = context.watch<BookingProvider>();
     final auth = context.read<AuthProvider>();
-    final booking = context.read<BookingProvider>();
+    final esNueva = cita.estado == EstadoCita.pendiente;
+    // H7: verificar compatibilidad con disponibilidad del cuidador
+    final esCompatible = booking.esCitaCompatible(cita);
+    final formato = DateFormat('EEE, d MMM y', 'es_MX');
     final profileService = ProfileService.instance;
 
-    String etiqueta;
-    Color etiquetaBg;
-    Color etiquetaFg;
-    if (esNueva) {
-      etiqueta = 'NUEVA';
-      etiquetaBg = AppColors.dangerSurface;
-      etiquetaFg = AppColors.danger;
-    } else if (esAceptada) {
-      etiqueta = 'ACEPTADA';
-      etiquetaBg = AppColors.successSurface;
-      etiquetaFg = AppColors.success;
-    } else if (esRechazada) {
-      etiqueta = 'RECHAZADA';
-      etiquetaBg = AppColors.dangerSurface;
-      etiquetaFg = AppColors.danger;
-    } else {
-      etiqueta = cita.estado.label.toUpperCase();
-      etiquetaBg = AppColors.primarySurface;
-      etiquetaFg = AppColors.primary;
-    }
-
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(
-                horizontal: 8, vertical: 3),
-            decoration: BoxDecoration(
-              color: etiquetaBg,
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Text(etiqueta,
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w800,
-                  color: etiquetaFg,
-                )),
-          ),
-          const SizedBox(height: 10),
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CircleAvatar(
-                radius: 28,
-                backgroundColor: AppColors.primarySurface,
-                child: const Icon(Icons.person,
-                    color: AppColors.primary, size: 26),
-              ),
-              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Solicitud de ${cita.tipoCuidado}',
+                    // Badge de estado
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: esNueva
+                            ? AppColors.primarySurface
+                            : AppColors.accentSurface,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        cita.estado.label,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: esNueva
+                              ? AppColors.primary
+                              : AppColors.accent,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                        cita.tipoCuidado,
                         style: const TextStyle(
                             fontWeight: FontWeight.w700,
                             color: AppColors.textPrimary)),
+                    // H7: badge de incompatibilidad con disponibilidad
+                    if (!esCompatible) ...[
+                      const SizedBox(height: 4),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: AppColors.dangerSurface,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: const [
+                            Icon(Icons.schedule_outlined,
+                                size: 12, color: AppColors.danger),
+                            SizedBox(width: 4),
+                            Text(
+                              'Fuera de tu disponibilidad',
+                              style: TextStyle(
+                                  fontSize: 11,
+                                  color: AppColors.danger),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 2),
                     if (cita.notas != null)
                       Text(cita.notas!,
@@ -316,13 +333,16 @@ class _TarjetaSolicitud extends StatelessWidget {
                           style: const TextStyle(
                               fontSize: 12,
                               color: AppColors.textSecondary)),
-
                     const SizedBox(height: 4),
                     FutureBuilder<Usuario?>(
-                      future: profileService.obtenerUsuarioPorId(cita.tutorId),
+                      future: profileService
+                          .obtenerUsuarioPorId(cita.tutorId),
                       builder: (context, snapshot) {
-                        final nombreTutor =
-                            snapshot.data?.nombreCompleto.trim().isNotEmpty == true
+                        final nombreTutor = snapshot.data
+                                    ?.nombreCompleto
+                                    .trim()
+                                    .isNotEmpty ==
+                                true
                             ? snapshot.data!.nombreCompleto
                             : 'Tutor no disponible';
                         return Row(
@@ -434,7 +454,8 @@ class _TarjetaSolicitud extends StatelessWidget {
                         cita.id, auth.usuario!.id);
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Solicitud rechazada')),
+                        const SnackBar(
+                            content: Text('Solicitud rechazada')),
                       );
                     }
                   },
@@ -464,16 +485,16 @@ class _TarjetaSolicitud extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text('Detalles de la solicitud',
-                style: TextStyle(
-                    fontSize: 18, fontWeight: FontWeight.w700)),
+                style:
+                    TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
             const SizedBox(height: 12),
             _detalleLinea('Tipo de cuidado', cita.tipoCuidado),
             _detalleLinea('Fecha',
                 DateFormat('EEE, d MMM y', 'es_MX').format(cita.fecha)),
             _detalleLinea('Horario',
                 '${cita.horaInicio} - ${cita.horaFin} (${cita.duracionHoras}h)'),
-            _detalleLinea(
-                'Total estimado', '\$${cita.totalEstimado.toStringAsFixed(0)} MXN'),
+            _detalleLinea('Total estimado',
+                '\$${cita.totalEstimado.toStringAsFixed(0)} MXN'),
             if (cita.notas != null)
               _detalleLinea('Notas', cita.notas!),
             const SizedBox(height: 12),
