@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -8,7 +10,7 @@ import '../../theme/app_colors.dart';
 import '../../widgets/bottom_nav.dart';
 
 /// Pantalla 06 - "NCBuscarCuidador"
-/// Búsqueda y filtrado de cuidadores (RF6, H6).
+/// Búsqueda y filtrado de cuidadores (RF6, H6, H22).
 class SearchCaregiversScreen extends StatefulWidget {
   const SearchCaregiversScreen({super.key});
 
@@ -18,6 +20,8 @@ class SearchCaregiversScreen extends StatefulWidget {
 
 class _SearchCaregiversScreenState extends State<SearchCaregiversScreen> {
   final _busquedaCtrl = TextEditingController();
+  // H22: debounce — espera 300ms antes de aplicar el filtro de texto
+  Timer? _debounce;
 
   @override
   void initState() {
@@ -29,8 +33,27 @@ class _SearchCaregiversScreenState extends State<SearchCaregiversScreen> {
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _busquedaCtrl.dispose();
     super.dispose();
+  }
+
+  void _onTextChanged(String v) {
+    // H22: cancela el timer anterior y arranca uno nuevo de 300ms
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 300), () {
+      final provider = context.read<CaregiverListProvider>();
+      provider.actualizarFiltros(
+        FiltrosBusqueda(
+          ubicacion: provider.filtros.ubicacion,
+          precioMaximo: provider.filtros.precioMaximo,
+          calificacionMinima: provider.filtros.calificacionMinima,
+          experienciaMinima: provider.filtros.experienciaMinima,
+          soloDisponibleHoy: provider.filtros.soloDisponibleHoy,
+          textoLibre: v.trim().isEmpty ? null : v.trim(),
+        ),
+      );
+    });
   }
 
   void _abrirFiltros() {
@@ -98,20 +121,12 @@ class _SearchCaregiversScreenState extends State<SearchCaregiversScreen> {
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
               child: TextField(
                 controller: _busquedaCtrl,
-                onChanged: (v) {
-                  final nuevos = FiltrosBusqueda(
-                    ubicacion: provider.filtros.ubicacion,
-                    precioMaximo: provider.filtros.precioMaximo,
-                    calificacionMinima: provider.filtros.calificacionMinima,
-                    experienciaMinima: provider.filtros.experienciaMinima,
-                    soloDisponibleHoy: provider.filtros.soloDisponibleHoy,
-                    textoLibre: v.trim().isEmpty ? null : v.trim(),
-                  );
-                  provider.actualizarFiltros(nuevos);
-                },
+                // H22: usa debounce en lugar de actualizar en cada tecla
+                onChanged: _onTextChanged,
                 decoration: const InputDecoration(
                   hintText: 'Buscar por nombre o palabra clave...',
-                  prefixIcon: Icon(Icons.search, color: AppColors.textHint),
+                  prefixIcon:
+                      Icon(Icons.search, color: AppColors.textHint),
                 ),
               ),
             ),
@@ -138,13 +153,15 @@ class _SearchCaregiversScreenState extends State<SearchCaregiversScreen> {
                 ),
               ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text('${resultados.length} cuidadores encontrados',
                       style: const TextStyle(
-                          fontSize: 13, color: AppColors.textSecondary)),
+                          fontSize: 13,
+                          color: AppColors.textSecondary)),
                   const Text('Ordenar por: Mejor calificados',
                       style: TextStyle(
                           fontSize: 12, color: AppColors.textHint)),
@@ -155,13 +172,14 @@ class _SearchCaregiversScreenState extends State<SearchCaregiversScreen> {
             Expanded(
               child: provider.cargando
                   ? const Center(
-                      child:
-                          CircularProgressIndicator(color: AppColors.primary),
+                      child: CircularProgressIndicator(
+                          color: AppColors.primary),
                     )
                   : resultados.isEmpty
                       ? const _Vacio()
                       : ListView.separated(
-                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                          padding:
+                              const EdgeInsets.fromLTRB(16, 8, 16, 16),
                           itemCount: resultados.length,
                           separatorBuilder: (_, __) =>
                               const SizedBox(height: 12),
@@ -199,7 +217,8 @@ class _Vacio extends StatelessWidget {
             Text(
               'Intenta ajustar los filtros para ampliar tu búsqueda.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+              style: TextStyle(
+                  color: AppColors.textSecondary, fontSize: 13),
             ),
           ],
         ),
@@ -224,159 +243,117 @@ class _TarjetaCuidador extends StatelessWidget {
         border: Border.all(color: AppColors.border),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Stack(
-                children: [
-                  CircleAvatar(
-                    radius: 32,
-                    backgroundColor: AppColors.primarySurface,
-                    child: Text(
-                      u.nombreCompleto.isNotEmpty
-                          ? u.nombreCompleto[0].toUpperCase()
-                          : '?',
-                      style: const TextStyle(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 22),
-                    ),
+              CircleAvatar(
+                radius: 28,
+                backgroundColor: AppColors.primarySurface,
+                child: Text(
+                  u.nombreCompleto.isNotEmpty
+                      ? u.nombreCompleto[0].toUpperCase()
+                      : '?',
+                  style: const TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 20,
                   ),
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: Container(
-                      width: 14,
-                      height: 14,
-                      decoration: BoxDecoration(
-                        color: AppColors.success,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 2),
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(u.nombreCompleto,
-                              style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.textPrimary)),
-                        ),
-                        const Icon(Icons.favorite_outline,
-                            color: AppColors.textHint),
-                      ],
+                    Text(
+                      u.nombreCompleto,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15,
+                        color: AppColors.textPrimary,
+                      ),
                     ),
                     const SizedBox(height: 2),
                     Row(
                       children: [
-                        ...List.generate(5, (i) {
-                          final esLleno =
-                              i < p.calificacionPromedio.floor();
-                          return Icon(
-                            esLleno ? Icons.star : Icons.star_border,
-                            color: AppColors.primary,
-                            size: 16,
-                          );
-                        }),
+                        ...List.generate(
+                          5,
+                          (i) => Icon(
+                            i < p.calificacionPromedio.round()
+                                ? Icons.star_rounded
+                                : Icons.star_outline_rounded,
+                            size: 14,
+                            color: Colors.amber,
+                          ),
+                        ),
                         const SizedBox(width: 4),
                         Text(
-                          '${p.calificacionPromedio.toStringAsFixed(1)} (${p.totalResenas} reseñas)',
+                          p.calificacionPromedio.toStringAsFixed(1),
                           style: const TextStyle(
                               fontSize: 12,
                               color: AppColors.textSecondary),
                         ),
+                        Text(
+                          ' (${p.totalResenas})',
+                          style: const TextStyle(
+                              fontSize: 11, color: AppColors.textHint),
+                        ),
                       ],
                     ),
-                    const SizedBox(height: 4),
-                    _filaInfo(Icons.person_outline,
-                        '${p.aniosExperiencia} años de experiencia'),
+                    if (u.ubicacion != null && u.ubicacion!.isNotEmpty)
+                      _filaInfo(
+                          Icons.location_on_outlined, u.ubicacion!),
+                    _filaInfo(
+                      Icons.workspace_premium_outlined,
+                      '${p.aniosExperiencia} año${p.aniosExperiencia != 1 ? 's' : ''} de experiencia',
+                    ),
+                    _filaInfo(
+                      Icons.attach_money,
+                      '\$${p.tarifaPorHora.toStringAsFixed(0)} MXN / hora',
+                    ),
                     if (p.certificaciones.isNotEmpty)
-                      _filaInfo(Icons.verified_user_outlined,
-                          p.certificaciones.first),
-                    if (p.capacidades.isNotEmpty)
-                      _filaInfo(Icons.favorite_outline,
-                          p.capacidades.take(2).join(', ')),
+                      _filaInfo(
+                        Icons.badge_outlined,
+                        p.certificaciones.take(2).join(', '),
+                      ),
                   ],
                 ),
               ),
             ],
           ),
           const SizedBox(height: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          Row(
             children: [
-              Wrap(
-                spacing: 8,
-                runSpacing: 6,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  Text(
-                    '\$${p.tarifaPorHora.toStringAsFixed(0)}',
-                    style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.primary),
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () => context.push(
+                    '${AppRoutes.tutorCaregiverDetail}/${u.id}',
                   ),
-                  const Padding(
-                    padding: EdgeInsets.only(top: 5),
-                    child: Text(' / hora',
-                        style: TextStyle(
-                            fontSize: 12, color: AppColors.textSecondary)),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: AppColors.successSurface,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Text('Disponible hoy',
-                        style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.success)),
-                  ),
-                ],
+                  style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(80, 36),
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 10)),
+                  child: const Text('Ver perfil',
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 12)),
+                ),
               ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => context.push(
-                          '${AppRoutes.tutorCaregiverDetail}/${u.id}'),
-                      style: OutlinedButton.styleFrom(
-                          minimumSize: const Size(0, 36),
-                          padding: const EdgeInsets.symmetric(horizontal: 10)),
-                      child: const Text('Ver perfil',
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(fontSize: 12)),
-                    ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () => context.push(
+                    '${AppRoutes.tutorBook}/${u.id}',
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () =>
-                          context.push('${AppRoutes.tutorBook}/${u.id}'),
-                      style: ElevatedButton.styleFrom(
-                          minimumSize: const Size(0, 36),
-                          padding: const EdgeInsets.symmetric(horizontal: 10)),
-                      child: const Text('Agendar',
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(fontSize: 12)),
-                    ),
-                  ),
-                ],
+                  style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(80, 36),
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 10)),
+                  child: const Text('Agendar',
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 12)),
+                ),
               ),
             ],
           ),
@@ -427,7 +404,8 @@ class _FiltrosSheetState extends State<_FiltrosSheet> {
   @override
   void initState() {
     super.initState();
-    _ubicacion = TextEditingController(text: widget.filtros.ubicacion ?? '');
+    _ubicacion =
+        TextEditingController(text: widget.filtros.ubicacion ?? '');
     _precioMax = widget.filtros.precioMaximo ?? 250;
     _calificacionMin = widget.filtros.calificacionMinima ?? 0;
     _experienciaMin = widget.filtros.experienciaMinima ?? 0;
@@ -522,8 +500,7 @@ class _FiltrosSheetState extends State<_FiltrosSheet> {
               onChanged: (v) => setState(() => _precioMax = v),
             ),
             const SizedBox(height: 4),
-            Text(
-                'Experiencia mínima: $_experienciaMin años',
+            Text('Experiencia mínima: $_experienciaMin años',
                 style: const TextStyle(
                     fontWeight: FontWeight.w600,
                     color: AppColors.textPrimary)),
@@ -534,7 +511,8 @@ class _FiltrosSheetState extends State<_FiltrosSheet> {
               divisions: 10,
               activeColor: AppColors.primary,
               label: '$_experienciaMin años',
-              onChanged: (v) => setState(() => _experienciaMin = v.round()),
+              onChanged: (v) =>
+                  setState(() => _experienciaMin = v.round()),
             ),
             const SizedBox(height: 4),
             Text(
@@ -549,7 +527,8 @@ class _FiltrosSheetState extends State<_FiltrosSheet> {
               divisions: 10,
               activeColor: AppColors.primary,
               label: _calificacionMin.toStringAsFixed(1),
-              onChanged: (v) => setState(() => _calificacionMin = v),
+              onChanged: (v) =>
+                  setState(() => _calificacionMin = v),
             ),
             const SizedBox(height: 16),
             Row(
@@ -573,10 +552,12 @@ class _FiltrosSheetState extends State<_FiltrosSheet> {
                               ? null
                               : _ubicacion.text.trim(),
                           precioMaximo: _precioMax,
-                          calificacionMinima:
-                              _calificacionMin == 0 ? null : _calificacionMin,
-                          experienciaMinima:
-                              _experienciaMin == 0 ? null : _experienciaMin,
+                          calificacionMinima: _calificacionMin == 0
+                              ? null
+                              : _calificacionMin,
+                          experienciaMinima: _experienciaMin == 0
+                              ? null
+                              : _experienciaMin,
                           soloDisponibleHoy: _soloHoy,
                           textoLibre: widget.filtros.textoLibre,
                         ),
